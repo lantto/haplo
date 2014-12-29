@@ -2,7 +2,9 @@
 
 var esprima = require('esprima'),
     escodegen = require('escodegen'),
-    _ = require('lodash');
+    _ = require('lodash'),
+    app = require('express')(),
+    bodyParser = require('body-parser');
     
 var serverFns = [],
     routeId = 1;
@@ -34,7 +36,7 @@ function traverse(item, fn, returnSelf) {
 function process(item) {
     var clientFn;
     
-    if ((((item.callee || {}).callee || {}).object || {}).name === 'haplo'
+    if ((((item.callee || {}).callee || {}).object || {}).name === 'same'
         && item.callee.callee.property.name === 'server'
     ) {
         serverFns.push({
@@ -60,7 +62,7 @@ function process(item) {
         routeId++;
     }
     
-    if (Array.isArray(item) && ((item[0] || {}).id || {}).name === 'haplo') {
+    if (Array.isArray(item) && ((item[0] || {}).id || {}).name === 'same') {
         item[0].init.callee = _.cloneDeep(item[0].init);
         
         item[0].init.arguments = [
@@ -73,7 +75,7 @@ function process(item) {
 }
 
 function getClientFn(item) {
-    if (((item.callee || {}).object || {}).name === 'haplo' 
+    if (((item.callee || {}).object || {}).name === 'same' 
         && item.callee.property.name === 'client'
     ) {
         return item.arguments[0];
@@ -81,7 +83,7 @@ function getClientFn(item) {
 }
 
 function omitClientFn(item) {
-    if ((((item.expression || {}).callee || {}).object || {}).name === 'haplo' 
+    if ((((item.expression || {}).callee || {}).object || {}).name === 'same' 
         && item.expression.callee.property.name === 'client'
     ) {
         item.expression.arguments = [];
@@ -96,8 +98,8 @@ function omitClientFn(item) {
 
 function generateServerAst(fns) {
     var serverAst = esprima.parse("\
-        var haplo = require('./haplo')('server'); \
-        var server = haplo.app.listen(3000); \
+        var same = require('./same')('server'); \
+        var server = same.app.listen(3000); \
     ");
     
     var run = serverAst.body.pop();
@@ -114,7 +116,7 @@ function generateServerAst(fns) {
                     computed: false,
                     object: {
                         type: 'Identifier',
-                        name: 'haplo'
+                        name: 'same'
                     },
                     property: {
                         type: 'Identifier',
@@ -134,7 +136,7 @@ function generateServerAst(fns) {
                     computed: false,
                     object: {
                         type: 'Identifier',
-                        name: 'haplo'
+                        name: 'same'
                     },
                     property: {
                         type: 'Identifier',
@@ -157,6 +159,28 @@ function generateServerAst(fns) {
     return serverAst;
 }
 
+function Server() {
+    this.app = app;
+    this.app.use(bodyParser.json());
+}
+
+Server.prototype.on = function(id, callback) {
+    var that = this;
+
+    app.post('/' + id, function(req, res) {
+        that.res = res;
+        callback(req.body);
+    });
+}
+
+Server.prototype.client = function() {
+    this.res.send(arguments);
+}
+
+Server.prototype.die = function() {
+    this.res.status(418).send('No sendback initiated.');
+}
+
 module.exports = {
     compile: function(code) {
         var clientAst, serverAst;
@@ -174,5 +198,8 @@ module.exports = {
             server: escodegen.generate(serverAst)
             // server: JSON.stringify(serverFns[0].fn)
         }
+    },
+    server: function() {
+        return new Server();
     }
 };
