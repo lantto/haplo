@@ -3,7 +3,7 @@
 var fs = require('fs'),
     mkpath = require('mkpath'),
     browserify = require('browserify'),
-    haplo = require('./haplo'),
+    haplo = require('../index'),
     fork = require('child_process').fork;
     
 var child, fsTimeout;
@@ -33,7 +33,7 @@ function run() {
         child.kill();
     }
     
-    child = fork('./snail');
+    child = fork('./server');
 }
 
 function pack() {

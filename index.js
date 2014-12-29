@@ -7,10 +7,7 @@ var esprima = require('esprima'),
 
     // Server dependencies
     express = require('express'),
-    bodyParser = require('body-parser'),
-
-    // Client dependencies
-    $ = require('jquery');
+    bodyParser = require('body-parser');
 
 function Compiler() {
     this.serverFns = [];
@@ -106,7 +103,7 @@ Compiler.prototype.omitClientFn = function(item) {
 
 Compiler.prototype.generateServerAst = function(fns) {
     var serverAst = esprima.parse("\
-        var haplo = require('./haplo')('server'); \
+        var haplo = require('haplo')('server'); \
         var server = haplo.app.listen(3000); \
     ");
     
@@ -203,25 +200,6 @@ Server.prototype.die = function() {
     this.res.status(418).send('No sendback initiated.');
 }
 
-function Client() {
-    this.host = '';
-}
-
-Client.prototype.server = function(id) {
-    var that = this;
-
-    return function(data, callback) {
-        $.ajax({
-            type: 'POST',
-            url: that.host + '/' + id,
-            dataType: 'json',
-            contentType : 'application/json',
-            data: JSON.stringify(data),
-            success: callback
-        });
-    }
-}
-
 module.exports = function(context) {
     switch (context) {
         case 'compiler':
@@ -229,9 +207,6 @@ module.exports = function(context) {
             break;
         case 'server':
             return new Server();
-            break;
-        case 'client':
-            return new Client();
             break;
     }
 }
