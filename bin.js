@@ -3,7 +3,7 @@
 var fs = require('fs'),
     mkpath = require('mkpath'),
     browserify = require('browserify'),
-    same = require('./same'),
+    haplo = require('./haplo'),
     fork = require('child_process').fork;
     
 var child, fsTimeout;
@@ -18,7 +18,7 @@ function compile() {
     console.log('compiling...');
     
     fs.readFile('main.js', function (err, data) {
-        var code = same.compile(data);
+        var code = haplo.compile(data);
 
         fs.writeFile('server.js', code.server, run);
         
