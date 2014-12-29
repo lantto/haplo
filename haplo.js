@@ -183,12 +183,13 @@ Compiler.prototype.compile = function(code) {
 function Server() {
     this.app = express();
     this.app.use(bodyParser.json());
+    this.app.use(express.static(__dirname + '/public'));
 }
 
 Server.prototype.on = function(id, callback) {
     var that = this;
 
-    app.post('/' + id, function(req, res) {
+    this.app.post('/' + id, function(req, res) {
         that.res = res;
         callback.apply(null, req.body);
     });
