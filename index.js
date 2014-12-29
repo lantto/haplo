@@ -7,7 +7,8 @@ var esprima = require('esprima'),
 
     // Server dependencies
     express = require('express'),
-    bodyParser = require('body-parser');
+    bodyParser = require('body-parser'),
+    path = require('path');
 
 function Compiler() {
     this.serverFns = [];
@@ -180,7 +181,7 @@ Compiler.prototype.compile = function(code) {
 function Server() {
     this.app = express();
     this.app.use(bodyParser.json());
-    this.app.use(express.static(__dirname + '/public'));
+    this.app.use(express.static(path.join(__dirname, '..', '..', 'public')));
 }
 
 Server.prototype.on = function(id, callback) {
