@@ -18,7 +18,9 @@ function compile() {
     console.log('compiling...');
     
     fs.readFile('main.js', function (err, data) {
-        var code = haplo.compile(data);
+        var compiler = haplo('compiler');
+
+        var code = compiler.compile(data);
 
         fs.writeFile('server.js', code.server, run);
         

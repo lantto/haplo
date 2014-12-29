@@ -1,16 +1,23 @@
 'use strict';
-
+    
+    // Compiler dependencies
 var esprima = require('esprima'),
     escodegen = require('escodegen'),
     _ = require('lodash'),
+
+    // Server dependencies
     app = require('express')(),
     bodyParser = require('body-parser'),
-    $ = require('jquery');
-    
-var serverFns = [],
-    routeId = 1;
 
-function traverse(item, fn, returnSelf) {
+    // Client dependencies
+    $ = require('jquery');
+
+function Compiler() {
+    this.serverFns = [];
+    this.routeId = 1;
+}
+
+Compiler.prototype.traverse = function(item, fn, returnSelf) {
     var fnResult, travResult;
 
     fnResult = fn(item);
@@ -21,7 +28,7 @@ function traverse(item, fn, returnSelf) {
 
     for (var prop in item) {
         if (item[prop] !== null && typeof(item[prop]) === 'object') {
-            travResult = traverse(item[prop], fn);
+            travResult = this.traverse(item[prop], fn);
             
             if (travResult) {
                 return travResult;
@@ -34,22 +41,22 @@ function traverse(item, fn, returnSelf) {
     }
 }
 
-function process(item) {
+Compiler.prototype.process = function(item) {
     var clientFn;
     
     if ((((item.callee || {}).callee || {}).object || {}).name === 'same'
         && item.callee.callee.property.name === 'server'
     ) {
-        serverFns.push({
-            id: routeId,
+        this.serverFns.push({
+            id: this.routeId,
             fn: _.cloneDeep(item.callee.arguments[0])
         });
         
-        clientFn = traverse(item.callee.arguments[0], getClientFn);
+        clientFn = this.traverse(item.callee.arguments[0], this.getClientFn);
 
         item.callee.arguments[0] = {
             type: 'Literal',
-            value: routeId
+            value: this.routeId
         }
         
         item.arguments = [
@@ -60,7 +67,7 @@ function process(item) {
             clientFn
         ]
         
-        routeId++;
+        this.routeId++;
     }
     
     if (Array.isArray(item) && ((item[0] || {}).id || {}).name === 'same') {
@@ -75,7 +82,7 @@ function process(item) {
     }
 }
 
-function getClientFn(item) {
+Compiler.prototype.getClientFn = function(item) {
     if (((item.callee || {}).object || {}).name === 'same' 
         && item.callee.property.name === 'client'
     ) {
@@ -83,7 +90,7 @@ function getClientFn(item) {
     }
 }
 
-function omitClientFn(item) {
+Compiler.prototype.omitClientFn = function(item) {
     if ((((item.expression || {}).callee || {}).object || {}).name === 'same' 
         && item.expression.callee.property.name === 'client'
     ) {
@@ -97,7 +104,7 @@ function omitClientFn(item) {
     }
 }
 
-function generateServerAst(fns) {
+Compiler.prototype.generateServerAst = function(fns) {
     var serverAst = esprima.parse("\
         var same = require('./same')('server'); \
         var server = same.app.listen(3000); \
@@ -106,7 +113,7 @@ function generateServerAst(fns) {
     var run = serverAst.body.pop();
 
     for (var i = 0; i < fns.length; i++) {
-        fns[i].fn = traverse(fns[i].fn, omitClientFn, true);
+        fns[i].fn = this.traverse(fns[i].fn, this.omitClientFn, true);
     
         fns[i].fn.body.body.push({
             type: 'ExpressionStatement',
@@ -160,6 +167,19 @@ function generateServerAst(fns) {
     return serverAst;
 }
 
+Compiler.prototype.compile = function(code) {
+    var clientAst, serverAst;
+
+    clientAst = this.traverse(esprima.parse(code), process, true); // Save server functions to this.serverFns and return client AST
+    
+    serverAst = generateServerAst(this.serverFns);
+    
+    return {
+        client: escodegen.generate(clientAst),
+        server: escodegen.generate(serverAst)
+    }
+}
+
 function Server() {
     this.app = app;
     this.app.use(bodyParser.json());
@@ -201,28 +221,16 @@ Client.prototype.server = function(id) {
     }
 }
 
-module.exports = {
-    compile: function(code) {
-        var clientAst, serverAst;
-        
-        // TODO: Avoid this. The problem is that the state is preserved between compilations. Do it like Browserify that you need to create the compiler each time?
-        serverFns = [];
-        routeId = 1; 
-        
-        clientAst = traverse(esprima.parse(code), process, true); // Save server functions to serverFns and return client AST
-        
-        serverAst = generateServerAst(serverFns);
-        
-        return {
-            client: escodegen.generate(clientAst),
-            server: escodegen.generate(serverAst)
-            // server: JSON.stringify(serverFns[0].fn)
-        }
-    },
-    server: function() {
-        return new Server();
-    },
-    client: function() {
-        return new Client();
+module.exports = function(context) {
+    switch (context) {
+        case 'compiler':
+            return new Compiler();
+            break;
+        case 'server':
+            return new Server();
+            break;
+        case 'client':
+            return new Client();
+            break;
     }
-};
+}
