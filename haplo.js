@@ -190,7 +190,7 @@ Server.prototype.on = function(id, callback) {
 
     app.post('/' + id, function(req, res) {
         that.res = res;
-        callback(req.body);
+        callback.apply(null, req.body);
     });
 }
 
