@@ -44,7 +44,7 @@ Compiler.prototype.traverse = function(item, fn, returnSelf) {
 Compiler.prototype.process = function(item) {
     var clientFn;
     
-    if ((((item.callee || {}).callee || {}).object || {}).name === 'same'
+    if ((((item.callee || {}).callee || {}).object || {}).name === 'haplo'
         && item.callee.callee.property.name === 'server'
     ) {
         this.serverFns.push({
@@ -70,7 +70,7 @@ Compiler.prototype.process = function(item) {
         this.routeId++;
     }
     
-    if (Array.isArray(item) && ((item[0] || {}).id || {}).name === 'same') {
+    if (Array.isArray(item) && ((item[0] || {}).id || {}).name === 'haplo') {
         item[0].init.callee = _.cloneDeep(item[0].init);
         
         item[0].init.arguments = [
@@ -83,7 +83,7 @@ Compiler.prototype.process = function(item) {
 }
 
 Compiler.prototype.getClientFn = function(item) {
-    if (((item.callee || {}).object || {}).name === 'same' 
+    if (((item.callee || {}).object || {}).name === 'haplo' 
         && item.callee.property.name === 'client'
     ) {
         return item.arguments[0];
@@ -91,7 +91,7 @@ Compiler.prototype.getClientFn = function(item) {
 }
 
 Compiler.prototype.omitClientFn = function(item) {
-    if ((((item.expression || {}).callee || {}).object || {}).name === 'same' 
+    if ((((item.expression || {}).callee || {}).object || {}).name === 'haplo' 
         && item.expression.callee.property.name === 'client'
     ) {
         item.expression.arguments = [];
@@ -106,8 +106,8 @@ Compiler.prototype.omitClientFn = function(item) {
 
 Compiler.prototype.generateServerAst = function(fns) {
     var serverAst = esprima.parse("\
-        var same = require('./same')('server'); \
-        var server = same.app.listen(3000); \
+        var haplo = require('./haplo')('server'); \
+        var server = haplo.app.listen(3000); \
     ");
     
     var run = serverAst.body.pop();
@@ -124,7 +124,7 @@ Compiler.prototype.generateServerAst = function(fns) {
                     computed: false,
                     object: {
                         type: 'Identifier',
-                        name: 'same'
+                        name: 'haplo'
                     },
                     property: {
                         type: 'Identifier',
@@ -144,7 +144,7 @@ Compiler.prototype.generateServerAst = function(fns) {
                     computed: false,
                     object: {
                         type: 'Identifier',
-                        name: 'same'
+                        name: 'haplo'
                     },
                     property: {
                         type: 'Identifier',
