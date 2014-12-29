@@ -4,7 +4,8 @@ var esprima = require('esprima'),
     escodegen = require('escodegen'),
     _ = require('lodash'),
     app = require('express')(),
-    bodyParser = require('body-parser');
+    bodyParser = require('body-parser'),
+    $ = require('jquery');
     
 var serverFns = [],
     routeId = 1;
@@ -181,6 +182,25 @@ Server.prototype.die = function() {
     this.res.status(418).send('No sendback initiated.');
 }
 
+function Client() {
+    this.host = '';
+}
+
+Client.prototype.server = function(id) {
+    var that = this;
+
+    return function(data, callback) {
+        $.ajax({
+            type: 'POST',
+            url: that.host + '/' + id,
+            dataType: 'json',
+            contentType : 'application/json',
+            data: JSON.stringify(data),
+            success: callback
+        });
+    }
+}
+
 module.exports = {
     compile: function(code) {
         var clientAst, serverAst;
@@ -201,5 +221,8 @@ module.exports = {
     },
     server: function() {
         return new Server();
+    },
+    client: function() {
+        return new Client();
     }
 };
