@@ -20,7 +20,7 @@ function Compiler() {
 Compiler.prototype.traverse = function(item, fn, returnSelf) {
     var fnResult, travResult;
 
-    fnResult = fn(item);
+    fnResult = fn.call(this, item);
     
     if (fnResult) {
         return fnResult;
@@ -43,7 +43,7 @@ Compiler.prototype.traverse = function(item, fn, returnSelf) {
 
 Compiler.prototype.process = function(item) {
     var clientFn;
-    
+
     if ((((item.callee || {}).callee || {}).object || {}).name === 'haplo'
         && item.callee.callee.property.name === 'server'
     ) {
@@ -170,9 +170,9 @@ Compiler.prototype.generateServerAst = function(fns) {
 Compiler.prototype.compile = function(code) {
     var clientAst, serverAst;
 
-    clientAst = this.traverse(esprima.parse(code), process, true); // Save server functions to this.serverFns and return client AST
+    clientAst = this.traverse(esprima.parse(code), this.process, true); // Save server functions to this.serverFns and return client AST
     
-    serverAst = generateServerAst(this.serverFns);
+    serverAst = this.generateServerAst(this.serverFns);
     
     return {
         client: escodegen.generate(clientAst),
