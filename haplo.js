@@ -6,7 +6,7 @@ var esprima = require('esprima'),
     _ = require('lodash'),
 
     // Server dependencies
-    app = require('express')(),
+    express = require('express'),
     bodyParser = require('body-parser'),
 
     // Client dependencies
@@ -181,7 +181,7 @@ Compiler.prototype.compile = function(code) {
 }
 
 function Server() {
-    this.app = app;
+    this.app = express();
     this.app.use(bodyParser.json());
 }
 
