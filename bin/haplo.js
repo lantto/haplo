@@ -7,7 +7,7 @@ var fs = require('fs'),
     fork = require('child_process').fork,
     gaze = require('gaze');
     
-var child, fsTimeout;
+var child;
 
 function compile() {
     fs.readFile('main.js', function (err, data) {
