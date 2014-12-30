@@ -17,7 +17,7 @@ function compile() {
         }
         
         console.log('Compiling...');
-    
+
         var compiler = haplo('compiler');
 
         var code = compiler.compile(data);
@@ -38,9 +38,13 @@ function run() {
 
 function pack() {
     mkpath('public/dist', function (err) {
-        browserify().add('./client.js').bundle().pipe(fs.createWriteStream('public/dist/bundle.js'));
-        
-        console.log('Done!');
+        var bundleStream = fs.createWriteStream('public/dist/bundle.js');
+    
+        bundleStream.on('close', function() {
+            console.log('Done!');
+        });
+    
+        browserify().add('./client.js').bundle().pipe(bundleStream);
     });
 }
 
