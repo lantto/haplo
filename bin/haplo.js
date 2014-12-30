@@ -4,20 +4,15 @@ var fs = require('fs'),
     mkpath = require('mkpath'),
     browserify = require('browserify'),
     haplo = require('../index'),
-    fork = require('child_process').fork;
+    fork = require('child_process').fork,
+    gaze = require('gaze');
     
 var child, fsTimeout;
 
-function compile(force) {
-    if (fsTimeout && !force) {
-        return;
-    }
-    
-    fsTimeout = setTimeout(function() { fsTimeout = null; }, 100); // http://stackoverflow.com/questions/12978924/fs-watch-fired-twice-when-i-change-the-watched-file
-
+function compile() {
     fs.readFile('main.js', function (err, data) {
         if (data.length === 0) {
-            compile(true);
+            compile();
             return;
         }
         
@@ -49,8 +44,8 @@ function pack() {
     });
 }
 
-fs.watch('main.js', function() {
-    compile();
+gaze('main.js', function() {
+    this.on('changed', compile);
 });
 
 compile();
