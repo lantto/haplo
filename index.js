@@ -67,17 +67,6 @@ Compiler.prototype.process = function(item) {
         
         this.routeId++;
     }
-    
-    if (Array.isArray(item) && ((item[0] || {}).id || {}).name === 'haplo') {
-        item[0].init.callee = _.cloneDeep(item[0].init);
-        
-        item[0].init.arguments = [
-            {
-                type: 'Literal',
-                value: 'client'
-            }
-        ];
-    }
 }
 
 Compiler.prototype.getClientFn = function(item) {

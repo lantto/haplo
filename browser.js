@@ -1,30 +1,40 @@
 'use strict';
 
-var $ = require('jquery');
+(function() {
+    var hasRequire = typeof require !== 'undefined';
 
-function Client() {
-    this.host = '';
-}
+    var $ = this.$;
 
-Client.prototype.server = function(id) {
-    var that = this;
-
-    return function(data, callback) {
-        $.ajax({
-            type: 'POST',
-            url: that.host + '/' + id,
-            dataType: 'json',
-            contentType : 'application/json',
-            data: JSON.stringify(data),
-            success: callback
-        });
+    if (typeof $ === 'undefined') {
+        if (hasRequire) {
+            $ = require('jquery');
+        } else {
+            throw new Error('Haplo requires jQuery');
+        }
     }
-}
 
-module.exports = function(context) {
-    switch (context) {
-        case 'client':
-            return new Client();
-            break;
+    function Client() {
+        this.host = '';
     }
-}
+
+    Client.prototype.server = function(id) {
+        var that = this;
+
+        return function(data, callback) {
+            $.ajax({
+                type: 'POST',
+                url: that.host + '/' + id,
+                dataType: 'json',
+                contentType : 'application/json',
+                data: JSON.stringify(data),
+                success: callback
+            });
+        }
+    }
+
+    if (typeof module === 'object' && typeof module.exports === 'object' ) {
+        module.exports = new Client();
+    } else {
+        window.haplo = new Client();
+    }
+}).call(this);
