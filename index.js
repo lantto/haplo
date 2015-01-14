@@ -78,12 +78,33 @@ Compiler.prototype.getClientFn = function(item) {
 }
 
 Compiler.prototype.omitClientFn = function(item) {
+    // haplo.client(function () { ... })
     if ((((item.expression || {}).callee || {}).object || {}).name === 'haplo' 
         && item.expression.callee.property.name === 'client'
     ) {
         item.expression.arguments = [];
         
         item.type = 'ReturnStatement';
+        
+        item.argument = item.expression;
+
+        delete item.expression;
+    }
+    
+    // haplo.client(function () { ... })(arg)
+    if (((((item.expression || {}).callee || {}).callee || {}).object || {}).name === 'haplo'
+        && item.expression.callee.callee.property.name === 'client'
+    ) {
+        item.expression.arguments = [
+            {
+                type: 'ArrayExpression',
+                elements: item.expression.arguments
+            }
+        ];
+        
+        item.type = 'ReturnStatement';
+        
+        item.expression.callee = item.expression.callee.callee;
         
         item.argument = item.expression;
         

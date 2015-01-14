@@ -27,7 +27,11 @@
                 dataType: 'json',
                 contentType : 'application/json',
                 data: JSON.stringify(data),
-                success: callback
+                success: function(data) {
+                    callback.apply(null, $.map(data, function(val) {
+                        return val;
+                    }));
+                }
             });
         }
     }
