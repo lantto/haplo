@@ -21,6 +21,10 @@
         var that = this;
 
         return function(data, callback) {
+			if (typeof data === 'function') {
+				callback = data;
+			}
+		
             $.ajax({
                 type: 'POST',
                 url: that.host + '/' + id,
