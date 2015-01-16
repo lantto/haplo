@@ -91,7 +91,7 @@ Compiler.prototype.omitClientFn = function(item) {
         delete item.expression;
     }
     
-    // haplo.client(function () { ... })(arg)
+    // haplo.client(function (arg) { ... })(arg)
     if (((((item.expression || {}).callee || {}).callee || {}).object || {}).name === 'haplo'
         && item.expression.callee.callee.property.name === 'client'
     ) {
