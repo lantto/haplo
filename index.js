@@ -143,7 +143,7 @@ Compiler.prototype.omitClientFn = function(item) {
 Compiler.prototype.generateServerAst = function(fns) {
     var serverAst = esprima.parse("\
         var haplo = require('haplo')('server'); \
-        var server = haplo.app.listen(3000); \
+        haplo.init(); \
     ");
     
     var run = serverAst.body.pop();
@@ -220,6 +220,18 @@ function Server() {
     this.app = express();
     this.app.use(bodyParser.json());
     this.app.use(express.static(path.join(__dirname, '..', '..', 'public')));
+	
+	this.port = 3000;
+}
+
+Server.prototype.setOptions = function(opts) {
+	for (var prop in opts) {
+		this[prop] = opts[prop];
+	}
+}
+
+Server.prototype.init = function() {
+	this.app.listen(this.port);
 }
 
 Server.prototype.on = function(id, callback) {
