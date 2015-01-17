@@ -41,8 +41,8 @@ Compiler.prototype.traverse = function(item, fn, returnSelf) {
 
 Compiler.prototype.process = function(item) {
     var clientFn;
-	
-	// haplo.client(function () { ... })
+    
+    // haplo.client(function () { ... })
     if ((((item.expression || {}).callee || {}).object || {}).name === 'haplo'
         && item.expression.callee.property.name === 'server'
     ) {
@@ -50,28 +50,28 @@ Compiler.prototype.process = function(item) {
             id: this.routeId,
             fn: _.cloneDeep(item.expression.arguments[0])
         });
-		
-		var callee = _.cloneDeep(item.expression.callee);
-		
-		item.expression.callee = {};
-		item.expression.callee.type = 'CallExpression';
-		item.expression.callee.callee = callee;
+        
+        var callee = _.cloneDeep(item.expression.callee);
+        
+        item.expression.callee = {};
+        item.expression.callee.type = 'CallExpression';
+        item.expression.callee.callee = callee;
         item.expression.callee.arguments = [{
             type: 'Literal',
             value: this.routeId
         }];
-		
+        
         clientFn = this.traverse(item.expression.arguments[0], this.getClientFn);
 
         item.expression.arguments = [clientFn];
         
         this.routeId++;
     }
-	
-	// haplo.server(function (arg) { ... })(arg)
+    
+    // haplo.server(function (arg) { ... })(arg)
     if ((((item.callee || {}).callee || {}).object || {}).name === 'haplo'
         && item.callee.callee.property.name === 'server'
-		&& item.arguments[0].type === 'Identifier' // Avoid this being triggered after callee callee has been created in case 1 (where the type will be FunctionExpression instead)
+        && item.arguments[0].type === 'Identifier' // Avoid this being triggered after callee callee has been created in case 1 (where the type will be FunctionExpression instead)
     ) {
         this.serverFns.push({
             id: this.routeId,
@@ -220,18 +220,18 @@ function Server() {
     this.app = express();
     this.app.use(bodyParser.json());
     this.app.use(express.static(path.join(__dirname, '..', '..', 'public')));
-	
-	this.port = 3000;
+    
+    this.port = 3000;
 }
 
 Server.prototype.setOptions = function(opts) {
-	for (var prop in opts) {
-		this[prop] = opts[prop];
-	}
+    for (var prop in opts) {
+        this[prop] = opts[prop];
+    }
 }
 
 Server.prototype.init = function() {
-	this.app.listen(this.port);
+    this.app.listen(this.port);
 }
 
 Server.prototype.on = function(id, callback) {

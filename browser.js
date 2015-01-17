@@ -16,21 +16,21 @@
     function Client() {
         this._host = '';
     }
-	
-	Client.prototype.setOptions = function(opts) {
-		for (var prop in opts) {
-			this['_' + prop] = opts[prop];
-		}
-	}
+    
+    Client.prototype.setOptions = function(opts) {
+        for (var prop in opts) {
+            this['_' + prop] = opts[prop];
+        }
+    }
 
     Client.prototype.server = function(id) {
         var that = this;
 
         return function(data, callback) {
-			if (typeof data === 'function') {
-				callback = data;
-			}
-		
+            if (typeof data === 'function') {
+                callback = data;
+            }
+        
             $.ajax({
                 type: 'POST',
                 url: that._host + '/' + id,
