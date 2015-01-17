@@ -14,8 +14,14 @@
     }
 
     function Client() {
-        this.host = '';
+        this._host = '';
     }
+	
+	Client.prototype.setOptions = function(opts) {
+		for (var prop in opts) {
+			this['_' + prop] = opts[prop];
+		}
+	}
 
     Client.prototype.server = function(id) {
         var that = this;
@@ -27,7 +33,7 @@
 		
             $.ajax({
                 type: 'POST',
-                url: that.host + '/' + id,
+                url: that._host + '/' + id,
                 dataType: 'json',
                 contentType : 'application/json',
                 data: JSON.stringify(data),
