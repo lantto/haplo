@@ -1,6 +1,6 @@
-'use strict';
-
 (function() {
+    'use strict';
+
     function Client() {
         this._host = '';
     }
