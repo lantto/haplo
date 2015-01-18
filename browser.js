@@ -1,18 +1,6 @@
 'use strict';
 
 (function() {
-    var hasRequire = typeof require !== 'undefined';
-
-    var $ = this.$;
-
-    if (typeof $ === 'undefined') {
-        if (hasRequire) {
-            $ = require('jquery');
-        } else {
-            throw new Error('Haplo requires jQuery');
-        }
-    }
-
     function Client() {
         this._host = '';
     }
@@ -27,22 +15,26 @@
         var that = this;
 
         return function(data, callback) {
+            var xhr;
+            
             if (typeof data === 'function') {
                 callback = data;
             }
-        
-            $.ajax({
-                type: 'POST',
-                url: that._host + '/' + id,
-                dataType: 'json',
-                contentType : 'application/json',
-                data: JSON.stringify(data),
-                success: function(data) {
-                    callback.apply(null, $.map(data, function(val) {
-                        return val;
+            
+            xhr = new XMLHttpRequest();
+            xhr.open('POST', that._host + '/' + id);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function() {
+                var data;
+                
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    data = JSON.parse(xhr.responseText);
+                    callback.apply(null, Object.keys(data).map(function(key) {
+                        return data[key];
                     }));
                 }
-            });
+            }
+            xhr.send(JSON.stringify(data));
         }
     }
 
