@@ -122,14 +122,7 @@ Compiler.prototype.omitClientFn = function(item) {
     // haplo.client(function (arg) { ... })(arg)
     if (((((item.expression || {}).callee || {}).callee || {}).object || {}).name === 'haplo'
         && item.expression.callee.callee.property.name === 'client'
-    ) {
-        item.expression.arguments = [
-            {
-                type: 'ArrayExpression',
-                elements: item.expression.arguments
-            }
-        ];
-        
+    ) {        
         item.type = 'ReturnStatement';
         
         item.expression.callee = item.expression.callee.callee;
