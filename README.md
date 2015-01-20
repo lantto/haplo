@@ -34,7 +34,7 @@ haplo.on(1, function () {
 ```
 
 # Installation
-#### 1. Install haplo globally:
+#### 1. Install haplo globally
 
 ```sh
 $ npm install --global haplo
