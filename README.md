@@ -81,7 +81,7 @@ Your application is now live at [http://localhost:3000](http://localhost:3000).
 Fire it up and have a look at the browser's console as well the terminal window where haplo is running. You should see that the console messages are printed in their respective environments.
 
 # Example
-A simple example of how to wire up a database. Input is validated both on the client and server.
+A simple example app with a MongoDB backend. Input is validated both on the client and server.
 
 ```javascript
 // main.js
