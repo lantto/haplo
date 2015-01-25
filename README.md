@@ -92,15 +92,15 @@ var form = document.forms[0];
 form.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    var item = form.elements[0].value;
+    var itemName = form.elements[0].value;
    
-    if (/[^A-Za-z0-9 ]/.test(item)) {
-        alert('Item may only contain alphanumerics');
+    if (/[^A-Za-z0-9]/.test(itemName)) {
+        alert('Item name may only contain alphanumerics');
         return;
     }
     
-    haplo.server(function(item) {
-        if (/[^A-Za-z0-9 ]/.test(item)) {
+    haplo.server(function(itemName) {
+        if (/[^A-Za-z0-9]/.test(itemName)) {
             return;
         }
    
@@ -109,13 +109,13 @@ form.addEventListener('submit', function(e) {
         var uri = 'mongodb://myuser:mypass@ds028017.mongolab.com:28017/mydb';
       
         mongo.connect(uri, function(err, db) {
-            db.collection('items').insert({name: item}, function(err, items) {
+            db.collection('items').insert({name: itemName}, function(err, items) {
                 haplo.client(function(id) {
                     alert('Item was added with id ' + id);
                 })(items[0]._id);
             });
         });
-    })(item);
+    })(itemName);
 });
 ```
 
@@ -125,8 +125,9 @@ form.addEventListener('submit', function(e) {
 <html>
 <head><title>Haplo Example</title></head>
 <body>
+    <h1>Add item</h1>
     <form>
-        <input type="text">
+        <input type="text" placeholder="Item name">
         <input type="submit" value="Add">
     </form>
     <script src="dist/bundle.js"></script>
