@@ -111,25 +111,13 @@ Compiler.prototype.omitClientFn = function(item) {
         && item.expression.callee.property.name === 'client'
     ) {
         item.expression.arguments = [];
-        
-        item.type = 'ReturnStatement';
-        
-        item.argument = item.expression;
-
-        delete item.expression;
     }
     
     // haplo.client(function (arg) { ... })(arg)
     if (((((item.expression || {}).callee || {}).callee || {}).object || {}).name === 'haplo'
         && item.expression.callee.callee.property.name === 'client'
-    ) {        
-        item.type = 'ReturnStatement';
-        
+    ) {
         item.expression.callee = item.expression.callee.callee;
-        
-        item.argument = item.expression;
-        
-        delete item.expression;
     }
 }
 
@@ -143,26 +131,6 @@ Compiler.prototype.generateServerAst = function(fns) {
 
     for (var i = 0; i < fns.length; i++) {
         fns[i].fn = this.traverse(fns[i].fn, this.omitClientFn, true);
-    
-        fns[i].fn.body.body.push({
-            type: 'ExpressionStatement',
-            expression: {
-                type: 'CallExpression',
-                callee: {
-                    type: 'MemberExpression',
-                    computed: false,
-                    object: {
-                        type: 'Identifier',
-                        name: 'haplo'
-                    },
-                    property: {
-                        type: 'Identifier',
-                        name: 'die'
-                    }
-                },
-                arguments: []
-            }
-        });
     
         serverAst.body.push({
             type: 'ExpressionStatement',
