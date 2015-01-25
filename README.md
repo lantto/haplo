@@ -15,7 +15,9 @@ haplo.server(function() {
 The data variable will only exist on the server and be retrieved by the client via AJAX on load. It works by compiling it down to separate files, one for each end, and automatically setting up routes for the transition between contexts.
 
 ```sh
-$ haplo main.js
+$ haplo
+Compiling...
+Done!
 ```
 
 ```javascript
