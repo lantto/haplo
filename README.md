@@ -86,7 +86,7 @@ Fire it up and have a look at the browser's console as well the terminal window 
 A simple example app with a MongoDB backend. Input is validated both on the client and server.
 
 ```javascript
-// main.js
+// app/main.js
 var haplo = require('haplo');
 
 var form = document.forms[0];
@@ -122,7 +122,7 @@ form.addEventListener('submit', function(e) {
 ```
 
 ```html
-<!-- public/index.html -->
+<!-- app/public/index.html -->
 <!doctype html>
 <html>
 <head><title>Haplo Example</title></head>
