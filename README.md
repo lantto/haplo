@@ -50,7 +50,7 @@ $ npm install haplo
 
 ```javascript
 // app/main.js
-var haplo = request('haplo');
+var haplo = require('haplo');
 
 console.log('Sending request to server');
 haplo.server(function() {
