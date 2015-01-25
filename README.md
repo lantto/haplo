@@ -31,7 +31,7 @@ haplo.server(1)(function (data) {
 // server.js
 haplo.on(1, function () {
     var data = 'foobar';
-    return haplo.client(data);
+    haplo.client(data);
 });
 ```
 
