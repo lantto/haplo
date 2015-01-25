@@ -16,8 +16,6 @@ The data variable will only exist on the server and be retrieved by the client v
 
 ```sh
 $ haplo main.js
-Compiling...
-Done!
 ```
 
 ```javascript
