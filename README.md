@@ -1,6 +1,6 @@
 haplo
 ====
-haplo lets you write both your front-end and back-end in the same codebase.
+haplo lets you write both your front-end and back-end in the same JavaScript codebase.
 
 ```javascript
 // main.js
