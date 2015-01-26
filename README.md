@@ -1,6 +1,6 @@
 haplo
 ====
-haplo lets you write both your front-end and back-end in the same codebase.
+haplo lets you write both your front-end and back-end in the same JavaScript codebase.
 
 ```javascript
 // main.js
@@ -29,7 +29,7 @@ haplo.server(1)(function (data) {
 // server.js
 haplo.on(1, function () {
     var data = 'foobar';
-    return haplo.client(data);
+    haplo.client(data);
 });
 ```
 
@@ -50,7 +50,7 @@ $ npm install haplo
 
 ```javascript
 // app/main.js
-var haplo = request('haplo');
+var haplo = require('haplo');
 
 console.log('Sending request to server');
 haplo.server(function() {
@@ -79,3 +79,58 @@ $ haplo
 Your application is now live at [http://localhost:3000](http://localhost:3000).
 
 Fire it up and have a look at the browser's console as well the terminal window where haplo is running. You should see that the console messages are printed in their respective environments.
+
+# Example
+A simple example app with a MongoDB backend. Input is validated both on the client and server.
+
+```javascript
+// app/main.js
+var haplo = require('haplo');
+
+var form = document.forms[0];
+
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var itemName = form.elements[0].value;
+   
+    if (/[^A-Za-z0-9]/.test(itemName)) {
+        alert('Item name may only contain alphanumerics');
+        return;
+    }
+    
+    haplo.server(function(itemName) {
+        if (/[^A-Za-z0-9]/.test(itemName)) {
+            return;
+        }
+   
+        var mongo = require('mongodb').MongoClient;
+      
+        var uri = 'mongodb://myuser:mypass@ds028017.mongolab.com:28017/mydb';
+      
+        mongo.connect(uri, function(err, db) {
+            db.collection('items').insert({name: itemName}, function(err, items) {
+                haplo.client(function(id) {
+                    alert('Item was added with id ' + id);
+                })(items[0]._id);
+            });
+        });
+    })(itemName);
+});
+```
+
+```html
+<!-- app/public/index.html -->
+<!doctype html>
+<html>
+<head><title>Haplo Example</title></head>
+<body>
+    <h1>Add item</h1>
+    <form>
+        <input type="text" placeholder="Item name">
+        <input type="submit" value="Add">
+    </form>
+    <script src="dist/bundle.js"></script>
+</body>
+</html>
+```
