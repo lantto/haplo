@@ -42,28 +42,24 @@ Compiler.prototype.traverse = function(item, fn, returnSelf) {
 Compiler.prototype.process = function(item) {
     var clientFn;
     
-    // haplo.client(function () { ... })
-    if ((((item.expression || {}).callee || {}).object || {}).name === 'haplo'
-        && item.expression.callee.property.name === 'server'
+    // haplo.server(function () { ... })
+    if (((item.callee || {}).object || {}).name === 'haplo'
+        && item.callee.property.name === 'server'
     ) {
         this.serverFns.push({
             id: this.routeId,
-            fn: _.cloneDeep(item.expression.arguments[0])
+            fn: _.cloneDeep(item.arguments[0])
         });
         
-        var callee = _.cloneDeep(item.expression.callee);
-        
-        item.expression.callee = {};
-        item.expression.callee.type = 'CallExpression';
-        item.expression.callee.callee = callee;
-        item.expression.callee.arguments = [{
-            type: 'Literal',
-            value: this.routeId
-        }];
-        
-        clientFn = this.traverse(item.expression.arguments[0], this.getClientFn);
+        clientFn = this.traverse(item.arguments[0], this.getClientFn);
 
-        item.expression.arguments = [clientFn];
+        item.arguments = [
+            {
+                type: 'Literal',
+                value: this.routeId
+            },
+            clientFn
+        ];
         
         this.routeId++;
     }
@@ -71,7 +67,6 @@ Compiler.prototype.process = function(item) {
     // haplo.server(function (arg) { ... })(arg)
     if ((((item.callee || {}).callee || {}).object || {}).name === 'haplo'
         && item.callee.callee.property.name === 'server'
-        && item.arguments[0].type === 'Identifier' // Avoid this being triggered after callee callee has been created in case 1 (where the type will be FunctionExpression instead)
     ) {
         this.serverFns.push({
             id: this.routeId,
@@ -80,19 +75,20 @@ Compiler.prototype.process = function(item) {
         
         clientFn = this.traverse(item.callee.arguments[0], this.getClientFn);
 
-        item.callee.arguments[0] = {
-            type: 'Literal',
-            value: this.routeId
-        }
+        item.callee = item.callee.callee;
         
         item.arguments = [
+            {
+                type: 'Literal',
+                value: this.routeId
+            },
             {
                 type: 'ArrayExpression',
                 elements: item.arguments
             },
             clientFn
-        ]
-        
+        ];
+
         this.routeId++;
     }
 }
