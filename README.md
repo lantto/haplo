@@ -20,7 +20,7 @@ $ haplo main.js
 
 ```javascript
 // client.js
-haplo.server(1)(function (data) {
+haplo.server(1, function (data) {
     alert(data);
 });
 ```
