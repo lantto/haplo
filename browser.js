@@ -3,6 +3,7 @@
 
     function Client() {
         this._host = '';
+        this._port = null;
     }
     
     Client.prototype.setOptions = function(opts) {
@@ -12,14 +13,26 @@
     }
 
     Client.prototype.server = function(id, data, callback) {
-        var xhr;
+        var xhr, 
+            url = '';
         
         if (typeof data === 'function') {
             callback = data;
         }
         
         xhr = new XMLHttpRequest();
-        xhr.open('POST', this._host + '/' + id);
+        
+        if (this._host) {
+            url += this._host;
+        }
+        
+        if (this._port) {
+            url += ':' + this._port;
+        }
+        
+        url += '/' + id;
+        
+        xhr.open('POST', url);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onreadystatechange = function() {
             var data;

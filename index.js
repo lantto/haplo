@@ -12,6 +12,7 @@ var esprima = require('esprima'),
 
 function Compiler() {
     this.serverFns = [];
+    this.setOptsFn;
     this.routeId = 1;
 }
 
@@ -91,6 +92,13 @@ Compiler.prototype.process = function(item) {
 
         this.routeId++;
     }
+    
+    // haplo.setOptions()
+    if ((((item.expression || {}).callee || {}).object || {}).name === 'haplo'
+        && item.expression.callee.property.name === 'setOptions'
+    ) {
+        this.setOptsFn = item;
+    }
 }
 
 Compiler.prototype.getClientFn = function(item) {
@@ -117,16 +125,20 @@ Compiler.prototype.omitClientFn = function(item) {
     }
 }
 
-Compiler.prototype.generateServerAst = function(fns) {
+Compiler.prototype.generateServerAst = function(routeFns, setOptsFn) {
     var serverAst = esprima.parse("\
         var haplo = require('haplo')('server'); \
         haplo.init(); \
     ");
     
     var run = serverAst.body.pop();
+    
+    if (setOptsFn) {
+        serverAst.body.push(setOptsFn);
+    }
 
-    for (var i = 0; i < fns.length; i++) {
-        fns[i].fn = this.traverse(fns[i].fn, this.omitClientFn, true);
+    for (var i = 0; i < routeFns.length; i++) {
+        routeFns[i].fn = this.traverse(routeFns[i].fn, this.omitClientFn, true);
     
         serverAst.body.push({
             type: 'ExpressionStatement',
@@ -147,9 +159,9 @@ Compiler.prototype.generateServerAst = function(fns) {
                 arguments: [
                     {
                         type: 'Literal',
-                        value: fns[i].id
+                        value: routeFns[i].id
                     },
-                    fns[i].fn
+                    routeFns[i].fn
                 ]
             }
         });
@@ -165,7 +177,7 @@ Compiler.prototype.compile = function(code) {
 
     clientAst = this.traverse(esprima.parse(code), this.process, true); // Save server functions to this.serverFns and return client AST
     
-    serverAst = this.generateServerAst(this.serverFns);
+    serverAst = this.generateServerAst(this.serverFns, this.setOptsFn);
     
     return {
         client: escodegen.generate(clientAst),
@@ -179,6 +191,7 @@ function Server() {
     this.app.use(express.static(path.join(__dirname, '..', '..', 'public')));
     
     this.port = 3000;
+    this.host;
 }
 
 Server.prototype.setOptions = function(opts) {
@@ -188,7 +201,11 @@ Server.prototype.setOptions = function(opts) {
 }
 
 Server.prototype.init = function() {
-    this.app.listen(this.port);
+    if (this.host) {
+        this.host = this.host.replace(/.*?:\/\//g, "");
+    }
+
+    this.app.listen(this.port, this.host);
 }
 
 Server.prototype.on = function(id, callback) {
