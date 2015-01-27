@@ -202,7 +202,7 @@ Server.prototype.setOptions = function(opts) {
 
 Server.prototype.init = function() {
     if (this.host) {
-        this.host = this.host.replace(/.*?:\/\//g, "");
+        this.host = this.host.replace(/.*?:\/\//g, '');
     }
 
     this.app.listen(this.port, this.host);
