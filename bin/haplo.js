@@ -7,10 +7,11 @@ var fs = require('fs'),
     fork = require('child_process').fork,
     gaze = require('gaze');
     
-var child;
+var child,
+    mainFile = process.argv[1] || 'main.js';
 
 function compile() {
-    fs.readFile('main.js', function (err, data) {
+    fs.readFile(mainFile, function (err, data) {
         if (data.length === 0) {
             compile();
             return;
@@ -48,7 +49,7 @@ function pack() {
     });
 }
 
-gaze('main.js', function() {
+gaze(mainFile, function() {
     this.on('changed', compile);
 });
 
