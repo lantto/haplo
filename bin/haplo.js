@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+'use strict';
+
 var fs = require('fs'),
     mkpath = require('mkpath'),
     browserify = require('browserify'),
