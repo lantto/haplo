@@ -10,7 +10,7 @@ var fs = require('fs'),
     gaze = require('gaze');
     
 var child,
-    mainFile = process.argv[1] || 'main.js';
+    mainFile = process.argv[2] || 'main.js';
 
 function compile() {
     fs.readFile(mainFile, function (err, data) {
