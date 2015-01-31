@@ -45,6 +45,7 @@ function pack() {
     
         bundleStream.on('close', function() {
             console.log('Done!');
+            console.log('Starting server...');
         });
     
         browserify().add('./client.js').bundle().pipe(bundleStream);
@@ -52,7 +53,10 @@ function pack() {
 }
 
 gaze(mainFile, function() {
-    this.on('changed', compile);
+    this.on('changed', function() {
+        console.log('\nFile change detected.');
+        compile();
+    });
 });
 
 compile();

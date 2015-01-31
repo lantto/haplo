@@ -205,7 +205,9 @@ Server.prototype.init = function() {
         this.host = this.host.replace(/.*?:\/\//g, '');
     }
 
-    this.app.listen(this.port, this.host);
+    this.app.listen(this.port, this.host, function() {
+        console.log('Server up at %s:%s', this.host || 'localhost', this.port); 
+    }.bind(this));
 }
 
 Server.prototype.on = function(id, callback) {
