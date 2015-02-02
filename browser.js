@@ -22,14 +22,14 @@
         
         xhr = new XMLHttpRequest();
         
-        if (this._host) {
-            url += this._host;
-        }
-        
+        url += this._host || window.location.protocol + '//' + window.location.hostname;
+
         if (this._port) {
             url += ':' + this._port;
+        } else if (window.location.port) {
+            url += ':' + window.location.port;
         }
-        
+
         url += '/' + id;
         
         xhr.open('POST', url);
