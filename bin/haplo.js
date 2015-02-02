@@ -14,6 +14,17 @@ var child,
 
 function compile() {
     fs.readFile(mainFile, function (err, data) {
+        if (err && err.code === 'ENOENT') {
+            if (mainFile === 'main.js') {
+                console.log('main.js not found. If your entry point is named something different please specify it as the second argument when running haplo.')
+            } else {
+                console.log(mainFile + ' not found. Make sure you are standing in the project root.');
+            }
+
+            process.exit();
+            return;
+        }
+
         if (data.length === 0) {
             compile();
             return;
