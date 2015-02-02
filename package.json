@@ -1,6 +1,6 @@
 {
   "name": "haplo",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Write both front-end and back-end in the same codebase.",
   "main": "index.js",
   "browser": "browser.js",
